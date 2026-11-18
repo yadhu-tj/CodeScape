@@ -1,0 +1,140 @@
+{
+  "contract_id": "payflow.verify_signature.v1",
+  "version": 1,
+  "review_date": "2026-11-18",
+  "review_scope": "Authored showcase contract checked against PROJECT_CONTEXT.md and source docstring; sandbox execution pending. This is not a runtime defect classification.",
+  "repository": "payflow-core",
+  "qualified_symbol": "services.auth.verify_signature",
+  "documentation_reference": "services/auth.py::verify_signature docstring, CONTRACT payflow.verify_signature.v1",
+  "valid_input_predicate": "isinstance(payload, str) and isinstance(sig, str)",
+  "valid_input_callable": "test_verify_signature_contract.valid_input",
+  "expected_behavior": {
+    "malformed_or_empty_signature": false,
+    "matching_valid_v1_hmac": true,
+    "wrong_well_formed_signature": false,
+    "non_string_arguments": "outside contract"
+  },
+  "known_reproduction_inputs": [
+    {
+      "payload": "{\"type\":\"payment.completed\",\"id\":\"evt_contract\"}",
+      "sig": "",
+      "expected_return": false,
+      "seeded_exception": "IndexError"
+    },
+    {
+      "payload": "{\"type\":\"payment.completed\",\"id\":\"evt_contract\"}",
+      "sig": "v1=not-hex",
+      "expected_return": false,
+      "seeded_exception": "ValueError"
+    },
+    {
+      "payload": "{\"type\":\"payment.completed\",\"id\":\"evt_contract\"}",
+      "sig": "v1=0",
+      "expected_return": false,
+      "seeded_exception": "ValueError"
+    }
+  ],
+  "negative_controls": [
+    "test_valid_signature_control",
+    "test_wrong_signature_control",
+    "test_empty_hex_signature_control",
+    "test_out_of_contract_input_control"
+  ],
+  "baseline_tests": [
+    "test_valid_signature",
+    "test_wrong_well_formed_signature",
+    "test_checkout_calculation",
+    "test_user_profile_lookup"
+  ],
+  "oracle_file": "test_verify_signature_contract.py",
+  "oracle_sha256": "95746f3033e3771371a4b3b72e16fe2ad8c3be95ec76d495ef7a4213b98a3dbd",
+  "source_snapshot": {
+    "algorithm": "sha256-sorted-path-and-file-sha256-json-v1",
+    "sha256": "df9107c7da06cd0ef06573ec578ff69a13c1a72983b6aa7726795996aa8fc93e",
+    "files": [
+      {
+        "path": "app.py",
+        "sha256": "41dc8eae385f9d159d03405979539405c8571f50fe73c00ccb9d24481173bdbd"
+      },
+      {
+        "path": "models/payment.py",
+        "sha256": "b5f73686ff3737e63a041da5d1881038ad1a7c352b24e7206aa16401a7f72100"
+      },
+      {
+        "path": "models/user.py",
+        "sha256": "4f9efcf134aebd84a57fe9b05dd8be2f76f9cf23fba455ba198bd10908769794"
+      },
+      {
+        "path": "routes/checkout.py",
+        "sha256": "726815d0dc9cb69752f9ee61f2c5542e51e05bba17d6e28746b3d6cd3d56244e"
+      },
+      {
+        "path": "routes/refunds.py",
+        "sha256": "b540c90cd4154696b6e67f496259c1aed43f04afec294c0a3da4532f39d2db62"
+      },
+      {
+        "path": "routes/stripe.py",
+        "sha256": "c05e7b58c65d855580ee2d34643fded948f9a8ffb27a14975dc1de59a88a7f8e"
+      },
+      {
+        "path": "routes/users.py",
+        "sha256": "71b6b85c87184f94320418bdba74673e0357f6508812a744bcb10a212497cbc7"
+      },
+      {
+        "path": "services/auth.py",
+        "sha256": "72f5857d4310c0f922ef9468ac2c14bfceb13ad4c1e08175cf95073e5bc3cb37"
+      },
+      {
+        "path": "services/checkout.py",
+        "sha256": "4f7dc2c37b037aa5ac9c5a6d8d476cdd58b6ee9d13c16d95392dfb039d31d098"
+      },
+      {
+        "path": "services/dispatcher.py",
+        "sha256": "d22908614d087a7a33747132101145779543a0271a2d4d201383cc9a3cffbe05"
+      },
+      {
+        "path": "services/payments.py",
+        "sha256": "64f9c27c84c7fada3bb2a0f9419379a7dfce85661f97fbf24e5acfed9f6ae862"
+      },
+      {
+        "path": "services/refunds.py",
+        "sha256": "79c8706601a066a095a6c63c116023b8ad403f69cddab5f3a9de4dd478a7e257"
+      },
+      {
+        "path": "services/users.py",
+        "sha256": "a497bfd3c2f3f04adb2a432b36d4bb45b98a52451f828bd2cf3adf2d99b99994"
+      },
+      {
+        "path": "services/webhook_listener.py",
+        "sha256": "2648f42f1d6be6a5a02348f999dcc4157a8405e3f6cc74f1baa099859f3a4f39"
+      },
+      {
+        "path": "tests/test_payflow.py",
+        "sha256": "28aadfc4f451793faf91df19404a0a84d28b18b0c055d2d08e319369ab0e300a"
+      },
+      {
+        "path": "utils/audit.py",
+        "sha256": "238ce7ae3c83b7c63d6867b42e775f390a9d33d485e2156bc5030ba44b0fb76f"
+      },
+      {
+        "path": "utils/money.py",
+        "sha256": "025cfb4446807612cba70e3f3b1dc76b7bb105a4162a6353ed802e1b4822b4e1"
+      },
+      {
+        "path": "utils/retry.py",
+        "sha256": "7b1ff9dcca7a239303fb70305537e6c49b3f9fd96e10450737c677d229938e4b"
+      }
+    ]
+  },
+  "hash_scope": "All 18 Python source files including four baseline tests; contract and ground truth are outside this snapshot. Exact file bytes are hashed.",
+  "execution_policy": "Sandbox only; clean baseline first, two fresh-container reproductions and reviewed-contract/setup controls before CONFIRMED_DEFECT.",
+  "runtime_validation": {
+    "status": "verified_seeded_behavior",
+    "date": "2026-11-18",
+    "fresh_container_runs": 2,
+    "expected_exception_failures_per_run": 3,
+    "passing_controls_per_run": 4,
+    "evidence": "data/evidence/phase0-baseline.json",
+    "note": "Not a Phase 4 triage-engine result; seeded source remains intentionally defective."
+  }
+}
