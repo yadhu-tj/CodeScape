@@ -1,0 +1,14 @@
+# Exact fixture bytes must survive Windows/Linux checkouts for contract hashes.
+* text=auto
+*.py text eol=lf
+*.json text eol=lf
+*.md text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+*.txt text eol=lf
+Dockerfile* text eol=lf
+.dockerignore text eol=lf
+.gitignore text eol=lf
+.gitattributes text eol=lf
+.editorconfig text eol=lf
+*.ps1 text eol=crlf
