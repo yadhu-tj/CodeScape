@@ -12,3 +12,5 @@ Dockerfile* text eol=lf
 .gitattributes text eol=lf
 .editorconfig text eol=lf
 *.ps1 text eol=crlf
+# Preserve reviewed oracle bytes, including its existing final blank line.
+backend/test_harness/contracts/test_verify_signature_contract.py whitespace=-blank-at-eof

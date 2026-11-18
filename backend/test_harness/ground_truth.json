@@ -1,0 +1,191 @@
+{
+  "schema_version": 1,
+  "repository": "payflow-core",
+  "python_files": 18,
+  "function_count_including_baseline_tests": 54,
+  "function_symbols": [
+    "app.health_check",
+    "models.payment.create_payment",
+    "models.payment.payment_public",
+    "models.payment.transition_payment",
+    "models.user.default_user",
+    "models.user.user_exists",
+    "models.user.user_public",
+    "routes.checkout.charge",
+    "routes.checkout.checkout_status",
+    "routes.checkout.quote",
+    "routes.refunds.list_refunds",
+    "routes.refunds.refund",
+    "routes.refunds.refund_status",
+    "routes.stripe.stripe_webhook",
+    "routes.users.add_user",
+    "routes.users.profile",
+    "routes.users.user_status",
+    "services.auth.sign_payload",
+    "services.auth.signature_digest",
+    "services.auth.verify_signature",
+    "services.checkout.CheckoutService._validate",
+    "services.checkout.CheckoutService.charge",
+    "services.checkout.apply_discount",
+    "services.checkout.checkout_total",
+    "services.dispatcher.dispatch_event",
+    "services.dispatcher.payment_completed",
+    "services.dispatcher.payment_failed",
+    "services.dispatcher.register_handler",
+    "services.payments.authorize_payment",
+    "services.payments.payment_receipt",
+    "services.payments.validate_currency",
+    "services.refunds.process_refund",
+    "services.refunds.refund_summary",
+    "services.refunds.validate_refund",
+    "services.users.UserDirectory.lookup",
+    "services.users.create_user",
+    "services.users.get_user",
+    "services.users.normalize_user_id",
+    "services.webhook_listener.handle_webhook",
+    "services.webhook_listener.parse_payload",
+    "services.webhook_listener.webhook_summary",
+    "tests.test_payflow.test_checkout_calculation",
+    "tests.test_payflow.test_user_profile_lookup",
+    "tests.test_payflow.test_valid_signature",
+    "tests.test_payflow.test_wrong_well_formed_signature",
+    "utils.audit.audit_and_retry",
+    "utils.audit.audit_entry",
+    "utils.audit.summarize_audit",
+    "utils.money.from_cents",
+    "utils.money.round_money",
+    "utils.money.to_cents",
+    "utils.retry.backoff_seconds",
+    "utils.retry.is_retryable",
+    "utils.retry.retry_with_audit"
+  ],
+  "route_entrypoints": [
+    {
+      "symbol": "routes.stripe.stripe_webhook",
+      "method": "POST",
+      "path": "/api/v1/stripe"
+    },
+    {
+      "symbol": "routes.checkout.charge",
+      "method": "POST",
+      "path": "/checkout/charge"
+    },
+    {
+      "symbol": "routes.checkout.quote",
+      "method": "POST",
+      "path": "/checkout/quote"
+    },
+    {
+      "symbol": "routes.checkout.checkout_status",
+      "method": "GET",
+      "path": "/checkout/status"
+    },
+    {
+      "symbol": "app.health_check",
+      "method": "GET",
+      "path": "/health"
+    },
+    {
+      "symbol": "routes.refunds.refund",
+      "method": "POST",
+      "path": "/refunds/create"
+    },
+    {
+      "symbol": "routes.refunds.list_refunds",
+      "method": "GET",
+      "path": "/refunds/list"
+    },
+    {
+      "symbol": "routes.refunds.refund_status",
+      "method": "GET",
+      "path": "/refunds/status"
+    },
+    {
+      "symbol": "routes.users.add_user",
+      "method": "POST",
+      "path": "/user/create"
+    },
+    {
+      "symbol": "routes.users.profile",
+      "method": "GET",
+      "path": "/user/profile"
+    },
+    {
+      "symbol": "routes.users.user_status",
+      "method": "GET",
+      "path": "/user/status"
+    }
+  ],
+  "selected_call_sites": [
+    {
+      "source_file": "routes/stripe.py",
+      "source_symbol": "routes.stripe.stripe_webhook",
+      "expression": "handle_webhook(payload, signature)",
+      "target_symbol": "services.webhook_listener.handle_webhook",
+      "kind": "calls",
+      "confidence": "confirmed"
+    },
+    {
+      "source_file": "services/webhook_listener.py",
+      "source_symbol": "services.webhook_listener.handle_webhook",
+      "expression": "verify_signature(payload, sig)",
+      "target_symbol": "services.auth.verify_signature",
+      "kind": "calls",
+      "confidence": "confirmed"
+    },
+    {
+      "source_file": "services/checkout.py",
+      "source_symbol": "services.checkout.CheckoutService.charge",
+      "expression": "self._validate(items, currency)",
+      "target_symbol": "services.checkout.CheckoutService._validate",
+      "kind": "calls",
+      "confidence": "probable"
+    },
+    {
+      "source_file": "services/dispatcher.py",
+      "source_symbol": "services.dispatcher.dispatch_event",
+      "expression": "handler(payload)",
+      "target_symbol": null,
+      "kind": "calls",
+      "confidence": "unresolved"
+    },
+    {
+      "source_file": "utils/retry.py",
+      "source_symbol": "utils.retry.retry_with_audit",
+      "expression": "audit_and_retry(remaining - 1, events)",
+      "target_symbol": "utils.audit.audit_and_retry",
+      "kind": "calls",
+      "confidence": "confirmed"
+    },
+    {
+      "source_file": "utils/audit.py",
+      "source_symbol": "utils.audit.audit_and_retry",
+      "expression": "retry_with_audit(remaining - 1, events)",
+      "target_symbol": "utils.retry.retry_with_audit",
+      "kind": "calls",
+      "confidence": "confirmed"
+    }
+  ],
+  "impact_fixture": {
+    "target": "services.auth.verify_signature",
+    "excluded_source_prefixes": [
+      "tests."
+    ],
+    "reason_for_exclusion": "Application impact view excludes baseline test callers; whole-source parser views must report their extra callers separately.",
+    "upstream_minimum_depth": {
+      "services.webhook_listener.handle_webhook": 1,
+      "routes.stripe.stripe_webhook": 2
+    },
+    "entrypoint": "/api/v1/stripe",
+    "note": "Call direction is route -> handler -> verifier; impact travels in reverse. Import edges are not traversed."
+  },
+  "cycle_fixture": {
+    "symbols": [
+      "utils.retry.retry_with_audit",
+      "utils.audit.audit_and_retry"
+    ],
+    "runtime_budget_maximum": 16,
+    "note": "Function-local import in audit avoids module-initialization failure; static local-import resolution must be supported."
+  },
+  "coverage_note": "Complete source symbol/route inventory, but selected call sites only. Do not use six selected sites as an exhaustive call-edge recall denominator or hard-code the illustrative 112-edge count."
+}
