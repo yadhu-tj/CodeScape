@@ -1,0 +1,18 @@
+FROM python:3.11-slim
+
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    PYTHONPATH=/workspace/repo:/workspace/test_run \
+    PIP_DISABLE_PIP_VERSION_CHECK=1 \
+    PYTEST_DISABLE_PLUGIN_AUTOLOAD=1
+
+COPY sandbox-requirements.txt /opt/codescape/sandbox-requirements.txt
+RUN python -m pip install --no-cache-dir -r /opt/codescape/sandbox-requirements.txt \
+    && groupadd --gid 1000 sandbox \
+    && useradd --uid 1000 --gid 1000 --no-create-home sandbox \
+    && mkdir -p /workspace/repo /workspace/test_run \
+    && chown -R 1000:1000 /workspace
+
+WORKDIR /workspace/test_run
+USER 1000:1000
+CMD ["python", "-m", "pytest", "-o", "cache_dir=/tmp/.pytest_cache", "/workspace/repo/tests/"]
