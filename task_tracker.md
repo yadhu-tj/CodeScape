@@ -10,9 +10,9 @@
 
 | # | Task | Owner | Status | Notes |
 |---|---|---|---|---|
-| P0 | PostgreSQL 16 + `pgvector` extension installed locally | Yadhu | `[ ]` | Create `codescape` database and verify `CREATE EXTENSION vector;` |
+| P0 | PostgreSQL 16 + `pgvector` extension installed locally | Yadhu | `[x]` | PostgreSQL 16.15 and pgvector 0.6.0 verified in Ubuntu WSL |
 | P1 | Docker Desktop / Docker Engine running locally | Yadhu | `[x]` | Docker Engine 29.1.3 installed and verified in Ubuntu-24.04 WSL; Linux containers tested. Distribution has no systemd; start dockerd directly when needed. |
-| P2 | Google Gemini API key obtained (`google-genai` SDK) | Yadhu | `[ ]` | Proposed configurable model defaults: `gemini-3.8-flash`, `gemini-3.5-flash-lite`, `gemini-embedding-2`; verify access and 768-d output support |
+| P2 | Google Gemini API key obtained (`google-genai` SDK) | Yadhu | `[x]` | **2026-11-21:** Google accepted the configured key. The summary and embedding requests passed, including the 768-value vector check. See 1.11 for reasoning status. |
 | P3 | Git repository initialized | Yadhu | `[x]` | Connected to yadhu-tj/CodeScape. Bootstrap main plus focused Phase 0 feature commits; PR workflow, CI and revert guidance are documented in CONTRIBUTING.md. |
 | P4 | `.gitignore` created | Yadhu | `[x]` | Exclude `.env`, `data/repos/`, `/tmp/codescape/`, `__pycache__/`, `node_modules/`, `.venv/` |
 | P5 | Initial folder structure created | Yadhu | `[ ]` | Match exact tree in `PROJECT_CONTEXT.md` |
@@ -43,20 +43,20 @@
 
 | # | Task | Owner | Status | Notes |
 |---|---|---|---|---|
-| 1.1 | `backend/requirements.txt` — Pin all async backend, Tree-sitter, Docker, and `google-genai` packages | Yadhu | `[ ]` | Do not include legacy `google-generativeai`; include Alembic |
-| 1.2 | `backend/config.py` — Pydantic `BaseSettings` loading `.env` | Yadhu | `[ ]` | V1 `EMBEDDING_DIMENSIONS=768` (fixed to match `Vector(768)`); changing requires a migration; `DEMO_MODE=false` |
-| 1.3 | `backend/database.py` — Async SQLAlchemy 2.0 engine (`asyncpg`), session maker and pgvector extension setup | Yadhu | `[ ]` | Configure async engine/session and pgvector; Alembic is authoritative (baseline task 1.15 runs after models and before verification 1.14); validate configured vector dimensions. |
-| 1.4 | `backend/models/repo.py` — `Repo` ORM model | Yadhu | `[ ]` | Includes `commit_sha`, `local_path`, `image_tag` |
-| 1.5 | `backend/models/node.py` — `Node` ORM model with `Vector(768)` and HNSW cosine index | Yadhu | `[ ]` | Stores full `body_text` for standalone `--demo` mode |
-| 1.6 | `backend/models/edge.py` — `Edge` ORM model with nullable `dst_node_id` & `raw_callee_expr` | Yadhu | `[ ]` | Nullable `dst_node_id` is mandatory for `unresolved` edges |
-| 1.7 | `backend/models/chaos_run.py` — `ChaosRun` ORM model | Yadhu | `[ ]` | Includes `blamed_node_id`, `classification`, `report` (`JSONB`), `log_ref` |
-| 1.8 | `backend/models/patch.py` — `Patch` ORM model | Yadhu | `[ ]` | Stores `replacement_code`, `unified_diff`, `verification_report` |
-| 1.9 | `backend/schemas/common.py` — Standard `{success, data, message}` response helpers | Yadhu | `[ ]` | Used across all FastAPI endpoints |
-| 1.10 | `backend/utils/redaction.py` — Secret & token scrubber before LLM calls | Yadhu | `[ ]` | Strips keys/tokens/credentials from code excerpts |
-| 1.11 | `backend/services/ai_provider.py` — Abstract `AIProvider` + `GeminiProvider` (`google-genai`) + `OllamaProvider` stub | Yadhu | `[ ]` | Configured model IDs (proposed defaults above); verify selected embedding model supports v1 `768d` schema; P2 smoke-test configured reasoning, summary and embedding model access with `google-genai`; assert every returned vector has length 768 before insert; keep live calls out of routine startup |
-| 1.12 | `backend/services/queue_service.py` + `RunEvent` model — durable event persistence and live fan-out | Yadhu | `[ ]` | Persist canonical `{run_id, seq, event, ts, payload}` events in PostgreSQL; Redis/in-memory queue are transports only; replay after `?after_seq=` |
-| 1.13 | `backend/main.py` — FastAPI app entry, lifespan `init_db()`, CORS, `--demo` CLI flag | Yadhu | `[ ]` | Restrict CORS to `http://localhost:5173`; shared `create_app(demo_mode=None)` supports `python main.py --demo` and `uvicorn main:app` via `DEMO_MODE`; CLI flag explicitly enables demo mode |
-| 1.14 | Verify PostgreSQL tables, constraints and `pgvector` HNSW index | Yadhu | `[ ]` | Execute only after task 1.15 baseline migration is applied; verify all six tables, constraints and indexes |
+| 1.1 | `backend/requirements.txt` — Pin all async backend, Tree-sitter, Docker, and `google-genai` packages | Yadhu | `[x]` | Do not include legacy `google-generativeai`; include Alembic |
+| 1.2 | `backend/config.py` — Pydantic `BaseSettings` loading `.env` | Yadhu | `[x]` | V1 `EMBEDDING_DIMENSIONS=768` (fixed to match `Vector(768)`); changing requires a migration; `DEMO_MODE=false` |
+| 1.3 | `backend/database.py` — Async SQLAlchemy 2.0 engine (`asyncpg`), session maker and pgvector extension setup | Yadhu | `[x]` | Configure async engine/session and pgvector; Alembic is authoritative (baseline task 1.15 runs after models and before verification 1.14); validate configured vector dimensions. |
+| 1.4 | `backend/models/repo.py` — `Repo` ORM model | Yadhu | `[x]` | Includes `commit_sha`, `local_path`, `image_tag` |
+| 1.5 | `backend/models/node.py` — `Node` ORM model with `Vector(768)` and HNSW cosine index | Yadhu | `[x]` | Stores full `body_text` for standalone `--demo` mode |
+| 1.6 | `backend/models/edge.py` — `Edge` ORM model with nullable `dst_node_id` & `raw_callee_expr` | Yadhu | `[x]` | Nullable `dst_node_id` is mandatory for `unresolved` edges |
+| 1.7 | `backend/models/chaos_run.py` — `ChaosRun` ORM model | Yadhu | `[x]` | Includes `blamed_node_id`, `classification`, `report` (`JSONB`), `log_ref` |
+| 1.8 | `backend/models/patch.py` — `Patch` ORM model | Yadhu | `[x]` | Stores `replacement_code`, `unified_diff`, `verification_report` |
+| 1.9 | `backend/schemas/common.py` — Standard `{success, data, message}` response helpers | Yadhu | `[x]` | Used across all FastAPI endpoints |
+| 1.10 | `backend/utils/redaction.py` — Secret & token scrubber before LLM calls | Yadhu | `[x]` | Regression tests cover triple-quoted secrets, truncated excerpts, and existing single-line assignments. |
+| 1.11 | `backend/services/ai_provider.py` — Abstract `AIProvider` + `GeminiProvider` (`google-genai`) + `OllamaProvider` stub | Yadhu | `[~]` | Routine startup makes no live provider calls. The local reasoning and summary configuration uses `gemini-3.5-flash-lite`. Both live checks and the 768-value `gemini-embedding-2` check passed. CodeScape cancels patch-drafting calls after 30 seconds. A direct `gemini-3.8-flash` request returned text after 70.1 seconds. Structured drafts with that model still need verification. Test generation directs callers to reviewed fixtures. |
+| 1.12 | `backend/services/queue_service.py` + `RunEvent` model — durable event persistence and live fan-out | Yadhu | `[x]` | Persist canonical `{run_id, seq, event, ts, payload}` events in PostgreSQL; Redis/in-memory queue are transports only; replay after `?after_seq=` **2026-11-21:** Verified 12 concurrent writes, cursor replay and local live delivery. |
+| 1.13 | `backend/main.py` — FastAPI app entry, lifespan `init_db()`, CORS, `--demo` CLI flag | Yadhu | `[x]` | Restrict CORS to `http://localhost:5173`; shared `create_app(demo_mode=None)` supports `python main.py --demo` and `uvicorn main:app` via `DEMO_MODE`; CLI flag explicitly enables demo mode |
+| 1.14 | Verify PostgreSQL tables, constraints and `pgvector` HNSW index | Yadhu | `[x]` | Execute only after task 1.15 baseline migration is applied; verify all six tables, constraints and indexes |
 
 ---
 
@@ -268,7 +268,7 @@ For each new task, record: **Priority** (`P0` blocker / `P1` core / `P2` polish)
 
 | Suggested ID | Action | Acceptance criteria |
 |---|---|---|
-| 1.15 | Add and apply Alembic migration baseline | Execute immediately after SQLAlchemy models `1.4`–`1.8` plus `RunEvent` from `1.12` are defined and before task `1.14`; a fresh database upgrade succeeds and a subsequent schema migration is testable. |
+| 1.15 | Add and apply Alembic migration baseline | Execute immediately after SQLAlchemy models `1.4`–`1.8` plus `RunEvent` from `1.12` are defined and before task `1.14`; a fresh database upgrade succeeds and a subsequent schema migration is testable. **2026-11-21:** Applied revision 0001 to the fresh local database; `alembic check` found no schema changes. |
 | 2.10 | Validate repository acquisition safety | Traversal, symlinks, oversized repositories and unsafe clone destinations are handled safely. |
 | 3.9 | Implement search-mode routing and no-result handling | Live embedding, replay and lexical fallback are explicit; empty/low-confidence matches are handled. |
 | 6.9 | Add canonical WebSocket event envelope and reconnect/replay | `queue_service.py`, `runs.py` and `ws.ts` share `{run_id, seq, event, ts, payload}`; `seq` is monotonic per run; events persist in `run_events`; `?after_seq=` replay is tested. |
@@ -323,9 +323,9 @@ The provider/privacy acceptance checks also document aggregate embedding egress:
 
 | Phase | Owner | Total Tasks | Done | Status |
 |---|---|---|---|---|
-| Pre-Coding | Yadhu | 7 | 3 | `[~]` In Progress |
+| Pre-Coding | Yadhu | 7 | 5 | `[~]` In Progress |
 | Phase 0 (Test Harness & Sandbox Image) | Yadhu | 10 | 10 | `[x]` Done; supplementary 0.11 also complete (11/11) |
-| Phase 1 (Backend Foundation & DB Schema) | Yadhu | 14 | 0 | `[ ]` Not Started |
+| Phase 1 (Backend Foundation & DB Schema) | Yadhu | 14 | 13 | `[~]` In progress; supplementary 1.15 complete |
 | Phase 2 (Engine 1: Two-Pass Ingestion) | Yadhu | 9 | 0 | `[ ]` Not Started |
 | Phase 3 (Engine 2 & 3: Graph-RAG & Blast Radius) | Yadhu | 8 | 0 | `[ ]` Not Started |
 | Phase 4 (Engine 4 & 5: Chaos Sandbox & Patch Loop) | Yadhu | 12 | 0 | `[ ]` Not Started |
