@@ -358,6 +358,7 @@ Eight of the nine selected sites matched. The call at `tests/test_legacy.py:18` 
 - Observed attribute writes and deletions invalidate later lookups of the original target, including calls made through another import alias. Regression coverage checks calls before and after the write.
 - Inherited method calls use C3 method resolution order when the local base hierarchy can be resolved. Unknown or inconsistent base hierarchies leave inherited targets unresolved. Regression coverage checks both base orders and an unknown external base.
 - The final local run passed 32 backend tests against PostgreSQL 16 with pgvector. Windows skipped the symlink test. Alembic upgraded a fresh database and reported no schema drift. The Phase 2 GitHub Actions workflow runs the suite on Ubuntu with PostgreSQL 16 and pgvector.
+- [PR #5](https://github.com/yadhu-tj/CodeScape/pull/5) contains the Phase 2 implementation and CI workflow. The initial PR head `c117549` passed [Phase 0 verification](https://github.com/yadhu-tj/CodeScape/actions/runs/45807065944) and [Phase 2 verification](https://github.com/yadhu-tj/CodeScape/actions/runs/45807066059).
 
 ## Progress Summary
 

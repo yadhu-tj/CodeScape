@@ -76,3 +76,22 @@ Last updated: 2026-11-26 (India Standard Time)
   showcase. Simulated provider failures left the graph available.
 - Verified the CodeScape HTTPS import, Alembic revision 0002, 24 backend tests
   and a real symlink rejection in Ubuntu WSL. Evidence is in task_tracker.md.
+
+2026-11-26 | Phase 2 review and GitHub verification
+- Added static import roots for src layouts. Calls to unimported siblings and
+  shadowed submodules stay unresolved, as do calls to unknown receivers.
+- Added a standalone CLI fixture. All seven reviewed call sites matched.
+  The independent python-slugify holdout hit the 2 MiB per-file cap on the
+  first HTTPS import. A snapshot of the same revision with the oversized
+  JSON file removed matched eight of nine call sites. The remaining target
+  is exposed through a wildcard re-export and stayed unresolved.
+- Added regressions for attribute reassignment and deletion through import
+  aliases. Known class hierarchies now use Python's C3 method resolution
+  order for inherited calls. Uncertain inherited targets stay unresolved.
+- The final local run passed 32 backend tests, with one Windows symlink test
+  skipped. Alembic upgraded a fresh PostgreSQL 16 database with pgvector and
+  found no schema drift.
+- Opened PR #5 for Phase 2. Both GitHub Actions workflows passed on c117549.
+  PR: https://github.com/yadhu-tj/CodeScape/pull/5
+  Phase 0 CI: https://github.com/yadhu-tj/CodeScape/actions/runs/45807065944
+  Phase 2 CI: https://github.com/yadhu-tj/CodeScape/actions/runs/45807066059
