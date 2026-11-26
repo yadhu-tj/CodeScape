@@ -27,6 +27,7 @@ class Settings(BaseSettings):
     AI_PROVIDER: Literal["gemini", "ollama"] = "gemini"
     GEMINI_API_KEY: SecretStr | None = None
     GEMINI_REASONING_MODEL: str = "gemini-3.8-flash"
+    GEMINI_REASONING_FALLBACK_MODEL: str | None = None
     GEMINI_SUMMARY_MODEL: str = "gemini-3.5-flash-lite"
     GEMINI_EMBEDDING_MODEL: str = "gemini-embedding-2"
     EMBEDDING_DIMENSIONS: int = SCHEMA_EMBEDDING_DIMENSIONS

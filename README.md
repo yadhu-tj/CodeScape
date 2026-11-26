@@ -121,6 +121,13 @@ An unset or unavailable Redis uses local wakeups for single-process development.
 PostgreSQL holds the replay history. Run `python -m backend.utils.smoke_test_genai`
 after configuring `GEMINI_API_KEY` and the model IDs in the ignored `.env`.
 
+Gemini requests use one short, randomized retry for HTTP 503. If you choose a
+different reasoning model, you can set
+`GEMINI_REASONING_FALLBACK_MODEL=gemini-3.5-flash-lite` to allow one fallback for
+patch drafting. All draft attempts share a 30-second deadline. The application
+logs the model that produced a valid draft at INFO level. Embedding retries use
+the configured embedding model.
+
 ## Documentation
 
 | Document | Purpose |

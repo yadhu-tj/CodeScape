@@ -1,5 +1,5 @@
 CodeScape progress log
-Last updated: 2026-11-21 (India Standard Time)
+Last updated: 2026-11-26 (India Standard Time)
 
 2026-11-18 | Design and planning
 - Reviewed the five project documents and aligned the design, implementation
@@ -61,3 +61,8 @@ Last updated: 2026-11-21 (India Standard Time)
 - Phase 1 stands at 13 of 14 tasks plus the completed Alembic baseline (1.15).
   Task 1.11 remains partial, and test generation uses reviewed fixtures.
   Phase 2 local parsing and graph storage can proceed.
+
+2026-11-26 | Live Redis verification
+- Verified Redis 7.0.15 pub/sub between separate broker instances in Ubuntu
+  WSL. Confirmed the same event replayed from PostgreSQL with Redis disabled.
+  Removed the temporary test records and stopped the test Redis instance.
