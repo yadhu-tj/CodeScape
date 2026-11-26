@@ -66,3 +66,13 @@ Last updated: 2026-11-26 (India Standard Time)
 - Verified Redis 7.0.15 pub/sub between separate broker instances in Ubuntu
   WSL. Confirmed the same event replayed from PostgreSQL with Redis disabled.
   Removed the temporary test records and stopped the test Redis instance.
+
+2026-11-26 | Phase 2 repository ingestion completed
+- Implemented bounded local and HTTPS snapshots, two-pass Tree-sitter analysis,
+  PostgreSQL graph persistence, repository APIs and local symbol search.
+- Verified 18 files, 54 functions and methods, 2 classes and 11 routes, with
+  36 confirmed, 1 probable and 73 unresolved calls for payflow-core.
+- Live Gemini enrichment stored 56 vectors for the authorized synthetic
+  showcase. Simulated provider failures left the graph available.
+- Verified the CodeScape HTTPS import, Alembic revision 0002, 24 backend tests
+  and a real symlink rejection in Ubuntu WSL. Evidence is in task_tracker.md.

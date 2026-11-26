@@ -9,11 +9,13 @@ from starlette.exceptions import HTTPException
 if __package__:
     from .config import Settings
     from .database import Database
+    from .routes.repos import router as repos_router
     from .schemas.common import api_response, error_response
     from .services.queue_service import LogStreamBroker
 else:
     from config import Settings
     from database import Database
+    from routes.repos import router as repos_router
     from schemas.common import api_response, error_response
     from services.queue_service import LogStreamBroker
 
@@ -39,6 +41,7 @@ def create_app(demo_mode: bool | None = None) -> FastAPI:
 
     application = FastAPI(title="CodeScape", lifespan=lifespan)
     application.state.settings = settings
+    application.include_router(repos_router)
     application.add_middleware(
         CORSMiddleware,
         allow_origins=[origin.strip() for origin in settings.CORS_ORIGINS.split(",") if origin.strip()],

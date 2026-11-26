@@ -210,7 +210,7 @@ Always execute repository ingestion in this exact sequence:
 
 1. **Filter & Redact:** Walk target repository directory (`./data/repos/<repo_name>`). Skip `.git`, `.venv`, `venv`, `__pycache__`, `node_modules`, `build`, `dist`, `.env*`, and files matching secret patterns (`*.pem`, `*.key`, `*credentials*`).
 2. **Pass 1 — Definitions & Complexity:**
-* Parse every `.py` file with Tree-sitter (`tree-sitter-python`).
+* Parse every included `.py` file with Tree-sitter (`tree-sitter-python`). Use the request's repository-relative static `import_root` (default `.`) to derive importable module names. Files outside that directory remain in the graph with repository-relative paths.
 * Extract `file`, `class`, and `function` symbols (`qualified_name`, `file_path`, `start_line`, `end_line`, `signature`, `docstring`, `body_text`).
 * Extract route decorator metadata (e.g., `@app.post("/api/v1/stripe")`, `@router.get(...)`) so entrypoint nodes retain their exposed HTTP route path.
 * Compute McCabe Cyclomatic Complexity for each function:
@@ -226,8 +226,8 @@ Use the exact CodeScape counting rules in **Complexity metric definition** above
 3. **Pass 2 — References & Confidence-Tagged Edges:**
 * Re-walk the cached syntax trees to resolve imports, inheritance, and call sites against the Pass 1 symbol map.
 * Assign confidence to every call edge:
-* `confirmed`: Callee resolves unambiguously to a single in-repo definition via explicit import or local scope.
-* `probable`: Resolved via structural heuristic (e.g., `self.method()` within a class hierarchy or unique method name in repo).
+* `confirmed`: Callee resolves unambiguously to a single in-repo definition via explicit import or local scope. Importing a submodule supplies evidence for that module and its ancestors. A sibling requires its own import or a package binding.
+* `probable`: Resolved via structural evidence such as `self.method()` within a known class hierarchy. An unknown receiver stays unresolved when the only evidence is a matching method name.
 * `unresolved`: Dynamic dispatch (`getattr`, dictionary callbacks like `EVENT_REGISTRY[evt](payload)`, unresolvable external/dynamic calls). Set `dst_node_id = NULL` and store the source expression in `raw_callee_expr`.
 
 

@@ -11,14 +11,15 @@ As codebases grow, routes, services, and callbacks make it difficult to understa
 | Showcase repository, reviewed contract, and sandbox image | Implemented and verified |
 | Async PostgreSQL schema, FastAPI health endpoint, and persistent event broker | Implemented |
 | Gemini provider and 768-dimensional embeddings | In progress. Live reasoning, summary, and embedding checks passed with the locally configured models. Test generation remains pending. |
-| Repository ingestion, graph search, blast-radius analysis, triage, and patch verification | Planned |
+| Python repository ingestion, graph API, and local symbol search | Implemented |
+| Hybrid graph search, blast-radius analysis, triage, and patch verification | Planned |
 | 3D explorer, UI telemetry, and offline demo playback | Planned |
 
 The [task tracker](task_tracker.md) records acceptance evidence and outstanding work.
 
-## Planned capabilities
+## Capabilities
 
-The following five engines describe the intended v1 design. Their implementation and integration are still planned.
+The five engines describe the intended v1 design. The development status table tracks implementation.
 
 
 ### 1. Engine 1: Two-Pass Ingestion & Static Modeling
@@ -60,7 +61,7 @@ The following five engines describe the intended v1 design. Their implementation
 | Storage | PostgreSQL 16 with pgvector, graph tables, and durable run events |
 | AI provider | Configurable Google GenAI models for embeddings, summaries, and patch drafts |
 | Event delivery | Redis pub/sub or single-process in-memory wakeups, backed by PostgreSQL replay |
-| Static analysis | Tree-sitter Python, planned for ingestion |
+| Static analysis | Tree-sitter Python for repository ingestion |
 | Sandbox | Docker and pytest for the showcase, with the general testing engine planned |
 | Frontend | React, TypeScript, Three.js, and Monaco, planned |
 
@@ -96,7 +97,7 @@ Machine-specific evidence is stored under ignored `data/evidence/`.
 On the verified Windows/Ubuntu WSL setup, use the exact invocation in the
 [Phase 0 verification report](backend/test_harness/PHASE0_VERIFICATION.md).
 
-## Start the Phase 1 API
+## Start the backend API
 
 Create a local PostgreSQL 16 database and configure `backend/.env` from
 [`backend/.env.example`](backend/.env.example). Install the server-side pgvector
@@ -114,8 +115,7 @@ python -m uvicorn backend.main:app --port 8000
 ```
 
 Check `GET /api/v1/health`. Start with `python backend/main.py --demo` to verify
-the demo flag. The Phase 1 endpoint reports the mode. Demo data and playback are
-scheduled for Phase 7.
+the demo flag. Demo data and playback are scheduled for Phase 7.
 
 An unset or unavailable Redis uses local wakeups for single-process development.
 PostgreSQL holds the replay history. Run `python -m backend.utils.smoke_test_genai`
@@ -127,6 +127,45 @@ different reasoning model, you can set
 patch drafting. All draft attempts share a 30-second deadline. The application
 logs the model that produced a valid draft at INFO level. Embedding retries use
 the configured embedding model.
+
+## Ingest and inspect a repository
+
+Send an empty JSON object to ingest the bundled showcase. Use the returned
+repository ID to retrieve its graph or search stored symbols.
+
+```bash
+curl -X POST http://127.0.0.1:8000/api/v1/repos -H "Content-Type: application/json" -d '{}'
+curl http://127.0.0.1:8000/api/v1/repos
+curl http://127.0.0.1:8000/api/v1/repos/1/graph
+curl -X POST http://127.0.0.1:8000/api/v1/repos/1/search -H "Content-Type: application/json" -d '{"query":"verify_signature"}'
+```
+
+Set `source` to a directory inside `REPOS_IMPORT_ROOT` or a credential-free HTTPS
+Git URL on a host listed in `REPOS_GIT_HOSTS`. The defaults are the CodeScape
+checkout and `github.com`. Snapshots are stored under `REPOS_STORAGE_PATH`.
+Ingestion skips common generated directories and secret file patterns, rejects
+included links and submodules, and limits snapshots to 2,000 files and 32 MiB.
+Syntax errors in included Python files produce a diagnostic for the affected file.
+
+For a `src/` layout, send `{"source":"my-project","import_root":"src"}`. The
+static import root defaults to `.` and is relative to the repository. It
+controls how Python files are named for import resolution, so
+`src/pkg/auth.py` is importable as `pkg.auth`. The graph still includes other
+Python files and keeps repository-relative file paths.
+
+The graph includes symbol spans and confidence-tagged calls, imports, and
+inheritance. Unresolved calls retain their source expression and line.
+The search endpoint reports `lexical_fallback` and searches symbol names,
+signatures, docstrings, and route paths locally.
+
+To enable hosted enrichment for an import, send `"embed": true`. This sends
+redacted function and class excerpts to the configured Gemini service. The
+structural graph remains available when enrichment is disabled, unavailable, or
+fails. Demo mode keeps enrichment disabled.
+
+To run the PostgreSQL API tests, set `CODESCAPE_PHASE2_TEST_DATABASE_URL` to a
+disposable database migrated to `head` and run
+`python -m unittest backend.tests.test_phase2_ingestion -v`.
 
 ## Documentation
 

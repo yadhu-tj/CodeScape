@@ -33,6 +33,8 @@ class Settings(BaseSettings):
     EMBEDDING_DIMENSIONS: int = SCHEMA_EMBEDDING_DIMENSIONS
     REDIS_URL: SecretStr | None = None
     REPOS_STORAGE_PATH: Path = REPOSITORY_ROOT / "data" / "repos"
+    REPOS_IMPORT_ROOT: Path = REPOSITORY_ROOT
+    REPOS_GIT_HOSTS: str = "github.com"
     EPHEMERAL_RUNS_PATH: Path = REPOSITORY_ROOT / "data" / "runs"
     SANDBOX_IMAGE_TAG: str = "codescape-sandbox:latest"
     SANDBOX_TIMEOUT_SECONDS: PositiveInt = 8
@@ -57,7 +59,7 @@ class Settings(BaseSettings):
             raise ValueError(f"The PostgreSQL schema requires vector({SCHEMA_EMBEDDING_DIMENSIONS})")
         return value
 
-    @field_validator("REPOS_STORAGE_PATH", "EPHEMERAL_RUNS_PATH")
+    @field_validator("REPOS_STORAGE_PATH", "REPOS_IMPORT_ROOT", "EPHEMERAL_RUNS_PATH")
     @classmethod
     def resolve_storage_path(cls, value: Path) -> Path:
         return (REPOSITORY_ROOT / value).resolve()
