@@ -66,3 +66,30 @@ Last updated: 2026-11-26 (India Standard Time)
 - Verified Redis 7.0.15 pub/sub between separate broker instances in Ubuntu
   WSL. Confirmed the same event replayed from PostgreSQL with Redis disabled.
   Removed the temporary test records and stopped the test Redis instance.
+
+2026-11-26 | Phase 2 repository ingestion completed
+- Implemented bounded local and HTTPS snapshots, two-pass Tree-sitter analysis,
+  PostgreSQL graph persistence, repository APIs and local symbol search.
+- Verified 18 files, 54 functions and methods, 2 classes and 11 routes, with
+  36 confirmed, 1 probable and 73 unresolved calls for payflow-core.
+- Live Gemini enrichment stored 56 vectors for the authorized synthetic
+  showcase. Simulated provider failures left the graph available.
+- Verified the CodeScape HTTPS import, Alembic revision 0002, 24 backend tests
+  and a real symlink rejection in Ubuntu WSL. Evidence is in task_tracker.md.
+
+2026-11-26 | Phase 2 review and GitHub verification
+- Added static import roots for src layouts. Calls to unimported siblings and
+  shadowed submodules stay unresolved, as do calls to unknown receivers.
+- Added a standalone CLI fixture. All seven reviewed call sites matched.
+  The independent python-slugify holdout hit the 2 MiB per-file cap on the
+  first HTTPS import. A snapshot of the same revision with the oversized
+  JSON file removed matched eight of nine call sites. The remaining target
+  is exposed through a wildcard re-export and stayed unresolved.
+- Added regressions for attribute reassignment and deletion through import
+  aliases. Known class hierarchies now use Python's C3 method resolution
+  order for inherited calls. Uncertain inherited targets stay unresolved.
+- The final local run passed 32 backend tests, with one Windows symlink test
+  skipped. Alembic upgraded a fresh PostgreSQL 16 database with pgvector and
+  found no schema drift.
+- Both GitHub Actions workflows passed on the initial Phase 2 review commit
+  c117549. The Phase 2 workflow verifies ingestion against PostgreSQL 16.

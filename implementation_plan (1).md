@@ -219,14 +219,14 @@ Implement `ingest_repository(repo_path_or_url: str, db: AsyncSession) -> Repo`:
    - Re-walk cached ASTs for every function and class body.
    - For every `call` node:
      - Resolve against local scope or explicit file imports $\rightarrow$ `Edge(kind='calls', confidence='confirmed', dst_node_id=target.id)`.
-     - Resolve `self.<method>()` inside class scope or unique method name across repo $\rightarrow$ `Edge(kind='calls', confidence='probable', dst_node_id=target.id)`.
+     - Resolve `self.<method>()` when the class scope or hierarchy identifies a candidate $\rightarrow$ `Edge(kind='calls', confidence='probable', dst_node_id=target.id)`. An unknown receiver with only a same-named method in the repository stays unresolved.
      - Otherwise (dynamic subscript call `EVENT_REGISTRY[k](x)`, `getattr`, unresolvable callback) $\rightarrow$ `Edge(kind='calls', confidence='unresolved', dst_node_id=None, raw_callee_expr=expr_text)`.
    - Bulk-insert all `Edge` rows.
 4. **Batched Vector Embedding:**
    - Batch all `function` and `class` nodes (e.g., 32 per batch), redact secrets, generate 768-d vectors via `ai_provider.embed_texts()`, and update `nodes.embedding`.
 
 #### [NEW] `backend/routes/repos.py` (Ingestion & Graph Endpoints)
-- `POST /api/v1/repos` — Trigger ingestion for `payflow-core` or a provided repo URL/path.
+- `POST /api/v1/repos` — Trigger ingestion for `payflow-core` or a provided repo URL/path. The optional repository-relative `import_root` defaults to `.` and maps a directory such as `src` to the top level of static Python imports.
 - `GET /api/v1/repos` — List all ingested repositories.
 - `GET /api/v1/repos/{id}/graph` — Return all `nodes` (excluding raw 768-float embedding array to keep JSON payload lean, but including `complexity`, `kind`, `route_path`, `file_path`, `start_line`, `end_line`) and all `edges` (`src_node_id`, `dst_node_id`, `confidence`, `raw_callee_expr`), plus summary counts.
 

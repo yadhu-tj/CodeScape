@@ -20,16 +20,20 @@ class Database:
         self.sessions = async_sessionmaker(self.engine, expire_on_commit=False)
 
     async def init_db(self) -> None:
-        """Verify the extension and embedding column installed by Alembic."""
+        """Verify the database has the required vector and repository columns."""
         async with self.engine.connect() as connection:
-            vector_column = await connection.scalar(text("""
-                SELECT pg_catalog.format_type(attribute.atttypid, attribute.atttypmod)
+            result = await connection.execute(text("""
+                SELECT attribute.attname, pg_catalog.format_type(attribute.atttypid, attribute.atttypmod)
                 FROM pg_catalog.pg_attribute AS attribute
-                WHERE attribute.attrelid = pg_catalog.to_regclass('nodes')
-                  AND attribute.attname = 'embedding' AND NOT attribute.attisdropped
+                WHERE NOT attribute.attisdropped AND (
+                    (attribute.attrelid = pg_catalog.to_regclass('nodes') AND attribute.attname = 'embedding')
+                    OR (attribute.attrelid = pg_catalog.to_regclass('repos')
+                        AND attribute.attname IN ('source_sha256', 'embedding_status'))
+                )
                 """))
-        if vector_column != "vector(768)":
-            raise RuntimeError("Expected nodes.embedding vector(768). Apply the Alembic baseline.")
+            columns = dict(result.tuples().all())
+        if columns.get("embedding") != "vector(768)" or not {"source_sha256", "embedding_status"} <= columns.keys():
+            raise RuntimeError("Required CodeScape schema is missing. Run alembic upgrade head.")
 
     async def session(self) -> AsyncIterator[AsyncSession]:
         async with self.sessions() as session:

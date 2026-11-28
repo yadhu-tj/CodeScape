@@ -1,0 +1,53 @@
+{
+  "schema_version": 1,
+  "repository": "report-cli",
+  "import_root": ".",
+  "python_files": 6,
+  "function_count": 8,
+  "http_route_count": 0,
+  "coverage_note": "Manually reviewed before running ingestion. These selected sites include a same-name target check and runtime dispatch. They do not enumerate all calls in the fixture.",
+  "selected_call_sites": [
+    {
+      "source_symbol": "report_tool.__main__",
+      "expression": "main()",
+      "target_symbol": "report_tool.cli.main",
+      "confidence": "confirmed"
+    },
+    {
+      "source_symbol": "report_tool.cli.main",
+      "expression": "build_parser()",
+      "target_symbol": "report_tool.cli.build_parser",
+      "confidence": "confirmed"
+    },
+    {
+      "source_symbol": "report_tool.cli.main",
+      "expression": "preview.build_report(options.labels)",
+      "target_symbol": "report_tool.preview.build_report",
+      "confidence": "confirmed"
+    },
+    {
+      "source_symbol": "report_tool.cli.main",
+      "expression": "build_report(options.labels)",
+      "target_symbol": "report_tool.reports.build_report",
+      "confidence": "confirmed"
+    },
+    {
+      "source_symbol": "report_tool.reports.build_report",
+      "expression": "normalize(label)",
+      "target_symbol": "report_tool.reports.normalize",
+      "confidence": "confirmed"
+    },
+    {
+      "source_symbol": "report_tool.cli.main",
+      "expression": "dispatch.render(report, options.format)",
+      "target_symbol": "report_tool.dispatch.render",
+      "confidence": "confirmed"
+    },
+    {
+      "source_symbol": "report_tool.dispatch.render",
+      "expression": "handler(report)",
+      "target_symbol": null,
+      "confidence": "unresolved"
+    }
+  ]
+}

@@ -64,3 +64,20 @@ On this machine the verified engine is in Ubuntu-24.04 WSL. See
 [PHASE0_VERIFICATION.md](PHASE0_VERIFICATION.md) for the measured image/source
 identities, results and exact Windows-to-WSL invocation. The helper also performs
 a sandbox-only HTTP/dispatcher/cycle smoke check outside the four-test baseline.
+
+## Phase 2 CLI fixture
+
+`report-cli/` is a small standard-library command-line project that summarizes
+labels and prints text or JSON. Its [reviewed call expectations](report_cli_ground_truth.json)
+were recorded before running ingestion. The checks cover the module entry
+call, local functions, relative imports, two same-named functions reached
+through different bindings, and a runtime formatter lookup.
+
+With the backend running and the default repository import directory, send
+`{"source":"backend/test_harness/report-cli"}` to `POST /api/v1/repos` and retrieve
+`GET /api/v1/repos/{id}/graph`.
+
+The first check on PostgreSQL 16 with pgvector matched all seven selected
+call sites. Six had the expected confirmed target, and the runtime formatter
+call had no target and was marked unresolved. The graph contained six files,
+eight functions and zero HTTP routes. The check covers the selected sites.

@@ -65,15 +65,15 @@
 
 | # | Task | Owner | Status | Notes |
 |---|---|---|---|---|
-| 2.1 | `ingestion_service.py` — Directory filter & git clone/copy manager (`./data/repos/`) | Yadhu | `[ ]` | Skip `.venv`, `__pycache__`, `.git`, `.env*`, secrets |
-| 2.2 | `ingestion_service.py` — Pass 1 AST walker: extract `file`, `class`, and `function` symbols | Yadhu | `[ ]` | Capture exact `start_line`, `end_line`, `signature`, `docstring`, `body_text` |
-| 2.3 | `ingestion_service.py` — Pass 1 decorator inspector: extract HTTP route paths (`@app.post`, `@router.get`) | Yadhu | `[ ]` | Store in `nodes.route_path` |
-| 2.4 | `ingestion_service.py` — Pass 1 CodeScape McCabe-style complexity calculator | Yadhu | `[ ]` | Follow the exact construct/counting contract in `PROJECT_CONTEXT.md`; test `elif`, `async for`, Boolean operands, conditional expressions and comprehension filters; avoid double-counting. |
-| 2.5 | `ingestion_service.py` — Flush Pass 1 `Node` rows and build in-memory `qualified_name -> node_id` map | Yadhu | `[ ]` | Prerequisite for cross-file Pass 2 resolution |
-| 2.6 | `ingestion_service.py` — Pass 2 AST walker: resolve imports, inheritance, and call sites | Yadhu | `[ ]` | Tag `confirmed`, `probable`, or `unresolved` (`dst_node_id=None`, `raw_callee_expr`) |
-| 2.7 | `ingestion_service.py` — Batched configured embedding-model vector generation (`output_dimensionality=768` for v1 schema) | Yadhu | `[ ]` | Redact excerpts before embedding; store in `nodes.embedding` |
-| 2.8 | `routes/repos.py` — `POST /api/v1/repos`, `GET /api/v1/repos`, `GET /api/v1/repos/{id}/graph` | Yadhu | `[ ]` | Exclude raw 768-float array from `/graph` response for fast serialization |
-| 2.9 | Ingest `payflow-core` and verify 18 files, ~54 functions, and all 3 edge confidence levels in DB | Yadhu | `[ ]` | Milestone 2 Verification |
+| 2.1 | `ingestion_service.py` — Directory filter & git clone/copy manager (`./data/repos/`) | Yadhu | `[x]` | Verified local snapshots and a credential-free HTTPS import of the CodeScape GitHub repository at `4e59bd4`. |
+| 2.2 | `ingestion_service.py` — Pass 1 AST walker: extract `file`, `class`, and `function` symbols | Yadhu | `[x]` | Verified inventory and decorated function spans, signatures, docstrings and source text. |
+| 2.3 | `ingestion_service.py` — Pass 1 decorator inspector: extract HTTP route paths (`@app.post`, `@router.get`) | Yadhu | `[x]` | All 11 showcase routes matched `ground_truth.json`. |
+| 2.4 | `ingestion_service.py` — Pass 1 CodeScape McCabe-style complexity calculator | Yadhu | `[x]` | Tests cover each decision construct, nested scopes, and the exclusion of `match`/`case`. |
+| 2.5 | `ingestion_service.py` — Flush Pass 1 `Node` rows and build in-memory symbol lookup | Yadhu | `[x]` | Pass 2 maps resolved symbols to persisted node IDs. Verified in PostgreSQL. |
+| 2.6 | `ingestion_service.py` — Pass 2 AST walker: resolve imports, inheritance, and call sites | Yadhu | `[x]` | Verified the selected showcase calls, relative aliases, local imports, shadowing, and class-method heuristics. Import and inheritance edges retain their own kinds. |
+| 2.7 | `ingestion_service.py` — Batched configured embedding-model vector generation (`output_dimensionality=768` for v1 schema) | Yadhu | `[x]` | Live Gemini enrichment stored 56 vectors for the authorized synthetic showcase. Invalid vector batches and missing configuration preserved the graph. |
+| 2.8 | `routes/repos.py` — `POST /api/v1/repos`, `GET /api/v1/repos`, `GET /api/v1/repos/{id}/graph` | Yadhu | `[x]` | Verified all three routes and the labelled lexical search endpoint. Graph responses omit vectors. |
+| 2.9 | Ingest `payflow-core` and verify 18 files, ~54 functions, and all 3 edge confidence levels in DB | Yadhu | `[x]` | PostgreSQL 16 with pgvector confirmed 18 files, 54 functions and methods, 2 classes, 11 routes, and all three call confidence levels. |
 
 ---
 
@@ -269,7 +269,7 @@ For each new task, record: **Priority** (`P0` blocker / `P1` core / `P2` polish)
 | Suggested ID | Action | Acceptance criteria |
 |---|---|---|
 | 1.15 | Add and apply Alembic migration baseline | Execute immediately after SQLAlchemy models `1.4`–`1.8` plus `RunEvent` from `1.12` are defined and before task `1.14`; a fresh database upgrade succeeds and a subsequent schema migration is testable. **2026-11-21:** Applied revision 0001 to the fresh local database; `alembic check` found no schema changes. |
-| 2.10 | Validate repository acquisition safety | Traversal, symlinks, oversized repositories and unsafe clone destinations are handled safely. |
+| 2.10 | Validate repository acquisition safety | `[x]` Verified size limits, traversal and URL rejection, cleanup, and rejection of an actual Linux symlink. |
 | 3.9 | Implement search-mode routing and no-result handling | Live embedding, replay and lexical fallback are explicit; empty/low-confidence matches are handled. |
 | 6.9 | Add canonical WebSocket event envelope and reconnect/replay | `queue_service.py`, `runs.py` and `ws.ts` share `{run_id, seq, event, ts, payload}`; `seq` is monotonic per run; events persist in `run_events`; `?after_seq=` replay is tested. |
 | 7.12 | Benchmark rendering under a defined workload | Graph size/device/browser and frame-time results are recorded; 60 FPS is not claimed universally. |
@@ -283,7 +283,7 @@ All original phase rows and task IDs above remain planned. These eight packages 
 | ID | Work and acceptance criteria | Priority | Estimate | Status | Blocked by |
 |---|---|---|---|---|---|
 | 0.11 | Create `backend/test_harness/contracts/` reviewed fixture for `verify_signature`: source hash/symbol, contract ID/version, documentation reference, valid-input predicate, expected False result and negative controls; fixture code runs only in sandbox. Preserve exactly four passing repository baseline tests. **2026-11-18:** Verified: versioned contract manifest binds exact source and oracle SHA256, documentation, predicate and expected outcomes; two fresh-container runs each give three intended exceptions and four passing controls. Future triage engine is not marked implemented. | P0 | 3–5 h | `[x]` | 0.3, 0.8 |
-| 2.11 | Separate structural ingestion from optional embedding and image preparation. Persist graph with null embeddings when provider is absent; expose labelled lexical search. Record source content hash even for non-git inputs; later verify it before patching. | P0 | 4–8 h | `[ ]` | 2.1–2.6, 2.8 |
+| 2.11 | Separate structural ingestion from optional embedding and image preparation. Persist graph with null embeddings when provider is absent; expose labelled lexical search. Record source content hash even for non-git inputs; later verify it before patching. | P0 | 4–8 h | `[x]` Graph persists before opt-in enrichment, and lexical search works with null vectors. Verified reproducible snapshot SHA-256 and migration 0002. Image preparation and patch-time hash checks belong to Phase 4. | 2.1–2.6, 2.8 |
 | 3.10 | Add mixed-kind/self-cycle/mutual-cycle/diamond graph fixtures; both traversal steps and 1-hop joins use same-repo resolved calls only. Toggle changes unresolved detail list only; impacted set/minimum depths/counts are identical. Count includes target; document unknown incoming-call limitation. | P0 | 3–6 h | `[ ]` | 3.2, 3.4–3.6 |
 | 4.13 | Define supported Python/pytest/Linux compatibility and explicit import roots; prove root and src-layout collection. Run selected baseline alone first. Prepare pinned reviewed dependencies in a restricted disposable builder, never target hooks on host; retain manifest hash, image digest, Python/import/test metadata and native-host Docker mount evidence. Missing/empty/wholly-skipped/failing baseline prevents verified status. | P0 | 6–12 h | `[ ]` | 0.9–0.10, 2.10, 2.11 |
 | 4.14 | Own hooks once in global reporter, narrow fakes in conftest and explicit global shared-fixture plugin when needed. Test collection/setup/call/teardown reporting and fixture scope across both test locations. Reject duplicate, missing, malformed, partial, zero-test and teardown-error reports. | P0 | 4–8 h | `[ ]` | 4.1, 4.2 |
@@ -319,6 +319,47 @@ The provider/privacy acceptance checks also document aggregate embedding egress:
 
 **11/11 Phase 0 tasks complete:** original 0.1–0.10 plus supplementary 0.11. M0 is satisfied by four passing baseline tests in network-disabled Docker. See `backend/test_harness/PHASE0_VERIFICATION.md` and local `data/evidence/phase0-baseline.json` for source/image identities and results. Six host-safe tooling tests pass; target/oracle execution occurred only in containers. No application ingestion/search/traversal/triage/patch engine is marked implemented. At the original Phase 0 verification no Git repository or commit existed. Repository publication now uses a bootstrap main and focused feature commits with a PR/CI workflow; remaining pre-coding items remain visible above.
 
+## Phase 2 completion evidence — 2026-11-26
+
+- M1 passed on PostgreSQL 16 with pgvector. The showcase produced 74 nodes and 150 edges, including 36 confirmed calls, 1 probable call, and 73 unresolved calls. All six selected call sites matched the fixture.
+- The opt-in live Gemini check stored 56 vectors of 768 dimensions for the synthetic showcase. Structural ingestion and lexical search worked without Gemini. A malformed provider batch left all vectors null.
+- On Windows with Python 3.14, reading, parsing and resolving the 18 showcase files took 22.9 ms on the first run and a median 18.8 ms across six subsequent runs in one process. This measurement excludes snapshot copying, database work and enrichment.
+- Alembic upgrade from revision 0001 and schema drift check passed. The backend suite passed 24 tests. The Windows symlink case was skipped and separately verified with a real symlink in Ubuntu WSL.
+
+### Phase 2 generalization checks
+
+- The explicit `src/` import-root API test passed. The separately designed CLI fixture matched all seven manually reviewed call sites through the PostgreSQL API. The CLI remains a maintained regression fixture. [CLI fixture evidence](backend/test_harness/README.md#phase-2-cli-fixture)
+- A resolver regression covers plain, aliased, and from-import forms when a regular module shadows a namespace directory. The equivalent regular-package and unobstructed namespace cases still resolve.
+
+#### Independent holdout — python-slugify
+
+The reviewed public revision is [`4b6b5b42f050f1ce96899e015247d5e3901cc433`](https://github.com/un33k/python-slugify/tree/4b6b5b42f050f1ce96899e015247d5e3901cc433). Expectations below were recorded from its source before the first ingestion. The check uses the repository root as the static import root and samples call sites by file, line and callee expression.
+
+| File | Line | Call | Expected target | Expected confidence |
+|---|---:|---|---|---|
+| `slugify/__main__.py` | 112 | `main()` | `slugify.__main__.main` | confirmed |
+| `slugify/__main__.py` | 51 | `parser.parse_args(argv[1:])` | — | unresolved |
+| `slugify/__main__.py` | 103 | `parse_args(argv)` | `slugify.__main__.parse_args` | confirmed |
+| `slugify/__main__.py` | 104 | `slugify_params(args)` | `slugify.__main__.slugify_params` | confirmed |
+| `slugify/__main__.py` | 106 | `slugify(**params)` | `slugify.slugify.slugify` | confirmed |
+| `slugify/slugify.py` | 227 | `_modern_truncate(text, max_length, word_boundary, separator, save_order)` | `slugify.slugify._modern_truncate` | confirmed |
+| `slugify/slugify.py` | 266 | `_legacy_slugify(…)` | `slugify._legacy.slugify` | confirmed |
+| `slugify/slugify.py` | 271 | `_modern_slugify(…)` | `slugify.slugify._modern_slugify` | confirmed |
+| `tests/test_legacy.py` | 18 | `slugify(txt)` | `slugify.slugify.slugify` | confirmed |
+
+**First run, full HTTPS repository.** `POST /api/v1/repos` returned HTTP 400 with “Repository exceeded its file count or size limit.” Inspection of the pinned Git tree found `docs/release-9/historical-evidence.json` at 3,594,939 bytes, above the 2 MiB per-file limit. Ingestion stopped during snapshot acquisition. No graph was produced, so the nine call-site expectations were unscored.
+
+**Follow-up, local snapshot of the same revision.** Omitted only the oversized JSON file and retained all Python source. The normal repository API ingested the snapshot with embeddings disabled on PostgreSQL 16 with pgvector. Snapshot SHA-256 was `39ff84e595477555c32adbb2530fd278a226b3489e42570bcd52a70b32b68735`. The graph contained 18 Python files, 172 functions and methods, 12 classes, and 1,133 total edges.
+
+Eight of the nine selected sites matched. The call at `tests/test_legacy.py:18` stayed unresolved because its target is exposed through a package wildcard re-export. The other seven expected resolved targets and the expected unresolved external call matched. No wrong target was observed among the selected sites. This sample does not estimate whole-repository precision or recall. The backend suite passed 30 tests, with the Windows symlink case skipped.
+
+#### Phase 2 review and regression coverage
+
+- Observed attribute writes and deletions invalidate later lookups of the original target, including calls made through another import alias. Regression coverage checks calls before and after the write.
+- Inherited method calls use C3 method resolution order when the local base hierarchy can be resolved. Unknown or inconsistent base hierarchies leave inherited targets unresolved. Regression coverage checks both base orders and an unknown external base.
+- The final local run passed 32 backend tests against PostgreSQL 16 with pgvector. Windows skipped the symlink test. Alembic upgraded a fresh database and reported no schema drift. The Phase 2 GitHub Actions workflow runs the suite on Ubuntu with PostgreSQL 16 and pgvector.
+- Commit `c117549` passed both the [Phase 0 workflow](https://github.com/yadhu-tj/CodeScape/actions/workflows/phase0.yml) and the [Phase 2 workflow](https://github.com/yadhu-tj/CodeScape/actions/workflows/phase2.yml) during the initial Phase 2 review.
+
 ## Progress Summary
 
 | Phase | Owner | Total Tasks | Done | Status |
@@ -326,14 +367,14 @@ The provider/privacy acceptance checks also document aggregate embedding egress:
 | Pre-Coding | Yadhu | 7 | 5 | `[~]` In Progress |
 | Phase 0 (Test Harness & Sandbox Image) | Yadhu | 10 | 10 | `[x]` Done; supplementary 0.11 also complete (11/11) |
 | Phase 1 (Backend Foundation & DB Schema) | Yadhu | 14 | 13 | `[~]` In progress; supplementary 1.15 complete |
-| Phase 2 (Engine 1: Two-Pass Ingestion) | Yadhu | 9 | 0 | `[ ]` Not Started |
+| Phase 2 (Engine 1: Two-Pass Ingestion) | Yadhu | 9 | 9 | `[x]` Complete |
 | Phase 3 (Engine 2 & 3: Graph-RAG & Blast Radius) | Yadhu | 8 | 0 | `[ ]` Not Started |
 | Phase 4 (Engine 4 & 5: Chaos Sandbox & Patch Loop) | Yadhu | 12 | 0 | `[ ]` Not Started |
 | Phase 5 (Frontend 3D Canvas & Zustand Store) | Yadhu | 9 | 0 | `[ ]` Not Started |
 | Phase 6 (HUD Panels, WS Telemetry & Monaco Diff) | Yadhu | 8 | 0 | `[ ]` Not Started |
 | Phase 7 (`--demo` Mode, Metrics & E2E Testing) | Yadhu | 11 | 0 | `[ ]` Not Started |
-| **Original Parent Work Packages (including pre-coding)** | **Yadhu** | **88** | **13** | `[~]` In Progress |
-| Original supplementary packages | Yadhu | 5 | 0 | `[ ]` Not Started |
-| Consistency-revision supplementary packages | Yadhu | 8 | 1 | `[~]` In Progress (0.11 complete) |
-| **Original packages including supplements and pre-coding** | **Yadhu** | **101** | **14** | `[~]` In Progress |
+| **Original Parent Work Packages (including pre-coding)** | **Yadhu** | **88** | **37** | `[~]` In Progress |
+| Original supplementary packages | Yadhu | 5 | 2 | `[~]` In Progress (1.15 and 2.10 complete) |
+| Consistency-revision supplementary packages | Yadhu | 8 | 2 | `[~]` In Progress (0.11 and 2.11 complete) |
+| **Original packages including supplements and pre-coding** | **Yadhu** | **101** | **41** | `[~]` In Progress |
 | Phase 8 (Optional Extensions) | Yadhu | 2 | 0 | `[ ]` Optional |
