@@ -91,7 +91,5 @@ Last updated: 2026-11-26 (India Standard Time)
 - The final local run passed 32 backend tests, with one Windows symlink test
   skipped. Alembic upgraded a fresh PostgreSQL 16 database with pgvector and
   found no schema drift.
-- Opened PR #5 for Phase 2. Both GitHub Actions workflows passed on c117549.
-  PR: https://github.com/yadhu-tj/CodeScape/pull/5
-  Phase 0 CI: https://github.com/yadhu-tj/CodeScape/actions/runs/45807065944
-  Phase 2 CI: https://github.com/yadhu-tj/CodeScape/actions/runs/45807066059
+- Both GitHub Actions workflows passed on the initial Phase 2 review commit
+  c117549. The Phase 2 workflow verifies ingestion against PostgreSQL 16.
